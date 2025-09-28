@@ -1,0 +1,268 @@
+{
+  "log_level": "INFO",
+  "log_file": "/app/logs/daemon.log",
+  "log_base_dir": "/app/logs",
+  "monitor_interval": 15,
+  "auto_start_processes": true,
+  "cleanup_logs": true,
+  "log_retention_days": 30,
+
+  "enterprise_features": {
+    "apm_monitoring": true,
+    "distributed_tracing": true,
+    "security_scanning": true,
+    "compliance_monitoring": true,
+    "high_availability": true,
+    "disaster_recovery": true,
+    "advanced_analytics": true,
+    "cost_optimization": true
+  },
+
+  "processes": [
+    {
+      "name": "api-gateway",
+      "command": "node gateway.js",
+      "working_dir": "/host/root/opt/microservices/gateway",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "7510",
+        "LOG_LEVEL": "info"
+      },
+      "auto_restart": true,
+      "max_restarts": 3,
+      "restart_delay": 10,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 75.0,
+      "memory_threshold": 80.0,
+      "high_availability": {
+        "enabled": true,
+        "strategy": "active_passive",
+        "secondary_instances": ["api-gateway-backup"],
+        "health_check": {
+          "endpoint": "http://localhost:7510/health",
+          "interval": 30,
+          "timeout": 5,
+          "failure_threshold": 3
+        }
+      },
+      "apm_config": {
+        "transaction_tracing": true,
+        "error_tracking": true,
+        "performance_monitoring": true
+      }
+    },
+    {
+      "name": "user-service",
+      "command": "java -jar user-service.jar",
+      "working_dir": "/host/root/opt/microservices/user-service",
+      "type": "java",
+      "env_vars": {
+        "SPRING_PROFILES_ACTIVE": "production",
+        "SERVER_PORT": "7511"
+      },
+      "auto_restart": true,
+      "max_restarts": 3,
+      "restart_delay": 15,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 70.0,
+      "memory_threshold": 85.0,
+      "circuit_breaker": {
+        "enabled": true,
+        "failure_threshold": 5,
+        "timeout": 60,
+        "success_threshold": 3
+      }
+    },
+    {
+      "name": "payment-service",
+      "command": "./payment-service",
+      "working_dir": "/host/root/opt/microservices/payment",
+      "type": "go",
+      "env_vars": {
+        "PORT": "7512",
+        "DB_CONNECTION": "postgres://..."
+      },
+      "auto_restart": true,
+      "max_restarts": 2,
+      "restart_delay": 20,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 60.0,
+      "memory_threshold": 70.0,
+      "security_config": {
+        "vulnerability_scanning": true,
+        "compliance_monitoring": true,
+        "privilege_escalation_detection": true
+      },
+      "disaster_recovery": {
+        "enabled": true,
+        "rto": 300,
+        "rpo": 60,
+        "backup_regions": ["us-west-2", "eu-west-1"]
+      }
+    },
+    {
+      "name": "frontend-app",
+      "command": "npm run start:prod",
+      "working_dir": "/host/root/opt/frontend",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "7513"
+      },
+      "auto_restart": true,
+      "max_restarts": 5,
+      "restart_delay": 5,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 80.0,
+      "memory_threshold": 75.0
+    }
+  ],
+
+  "distributed_tracing": {
+    "enabled": true,
+    "sampling_rate": 0.1,
+    "trace_timeout": 300,
+    "export_traces": true,
+    "jaeger_endpoint": "http://jaeger:14268/api/traces"
+  },
+
+  "security": {
+    "vulnerability_scanning": {
+      "enabled": true,
+      "scan_interval": 86400,
+      "auto_remediation": false,
+      "severity_threshold": "medium"
+    },
+    "compliance_frameworks": ["SOC2", "GDPR", "HIPAA"],
+    "security_monitoring": {
+      "file_integrity_monitoring": true,
+      "privilege_escalation_detection": true,
+      "network_anomaly_detection": true,
+      "log_analysis": true
+    }
+  },
+
+  "high_availability": {
+    "global_config": {
+      "failover_timeout": 30,
+      "auto_failback": true,
+      "cross_region_replication": true
+    },
+    "load_balancing": {
+      "algorithm": "round_robin",
+      "health_check_interval": 30,
+      "connection_draining_timeout": 60
+    }
+  },
+
+  "disaster_recovery": {
+    "global_config": {
+      "backup_retention_days": 30,
+      "backup_frequency": "hourly",
+      "cross_region_backup": true,
+      "automated_failover": true
+    },
+    "notification_channels": ["email", "slack", "pagerduty"]
+  },
+
+  "analytics": {
+    "data_retention_days": 90,
+    "trend_analysis": true,
+    "anomaly_detection": true,
+    "capacity_planning": true,
+    "cost_optimization": true,
+    "performance_baselines": true,
+    "predictive_scaling": true
+  },
+
+  "notifications": {
+    "email_enabled": true,
+    "email_smtp_server": "smtp.company.com",
+    "email_smtp_port": 587,
+    "email_username": "processguard@company.com",
+    "email_password": "${EMAIL_PASSWORD}",
+    "email_recipients": [
+      "devops@company.com",
+      "sre@company.com",
+      "oncall@company.com"
+    ],
+    "email_use_tls": true,
+
+    "slack_enabled": true,
+    "slack_webhook_url": "${SLACK_WEBHOOK_URL}",
+
+    "pagerduty_enabled": true,
+    "pagerduty_integration_key": "${PAGERDUTY_KEY}",
+
+    "webhook_enabled": true,
+    "webhook_url": "https://monitoring.company.com/webhook/processguard",
+    "webhook_headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${WEBHOOK_TOKEN}"
+    }
+  },
+
+  "integrations": {
+    "prometheus": {
+      "enabled": true,
+      "endpoint": "http://prometheus:9090",
+      "metrics_export": true
+    },
+    "grafana": {
+      "enabled": true,
+      "dashboard_provisioning": true,
+      "endpoint": "http://grafana:3000"
+    },
+    "elasticsearch": {
+      "enabled": true,
+      "log_shipping": true,
+      "endpoint": "http://elasticsearch:9200"
+    },
+    "datadog": {
+      "enabled": false,
+      "api_key": "${DATADOG_API_KEY}",
+      "app_key": "${DATADOG_APP_KEY}"
+    }
+  },
+
+  "compliance": {
+    "audit_logging": true,
+    "data_encryption": {
+      "logs_at_rest": true,
+      "metrics_in_transit": true,
+      "configuration_encryption": true
+    },
+    "access_control": {
+      "rbac_enabled": true,
+      "mfa_required": true,
+      "session_timeout": 3600
+    },
+    "data_retention": {
+      "logs_days": 90,
+      "metrics_days": 365,
+      "traces_days": 30
+    }
+  },
+
+  "performance_tuning": {
+    "buffer_sizes": {
+      "metrics_buffer": 10000,
+      "log_buffer": 5000,
+      "trace_buffer": 1000
+    },
+    "batch_processing": {
+      "metrics_batch_size": 100,
+      "flush_interval": 10
+    },
+    "resource_limits": {
+      "max_memory_mb": 2048,
+      "max_cpu_percent": 50,
+      "max_open_files": 10000
+    }
+  }
+}

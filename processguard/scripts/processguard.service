@@ -1,0 +1,38 @@
+[Unit]
+Description=ProcessGuard Monitoring Daemon
+Documentation=https://github.com/your-org/processguard
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=processguard
+Group=processguard
+WorkingDirectory=/opt/processguard
+Environment=PATH=/opt/processguard/venv/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/opt/processguard
+ExecStart=/opt/processguard/venv/bin/python -m backend.src.api.main --config /etc/processguard/config.json --host 127.0.0.1 --port 7500
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/processguard /tmp
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=processguard
+
+[Install]
+WantedBy=multi-user.target

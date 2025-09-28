@@ -1,0 +1,129 @@
+{
+  "log_level": "DEBUG",
+  "log_file": "/app/logs/daemon.log",
+  "log_base_dir": "/app/logs",
+  "monitor_interval": 5,
+  "auto_start_processes": true,
+  "cleanup_logs": true,
+  "log_retention_days": 3,
+
+  "processes": [
+    {
+      "name": "nodejs-backend",
+      "command": "node server.js",
+      "working_dir": "/host/root/home/user/my-backend",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3001",
+        "DEBUG": "*",
+        "LOG_LEVEL": "debug"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 3,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "alert_on_high_cpu": true,
+      "alert_on_high_memory": true,
+      "cpu_threshold": 70.0,
+      "memory_threshold": 70.0
+    },
+    {
+      "name": "react-frontend",
+      "command": "npm start",
+      "working_dir": "/host/root/home/user/my-frontend",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3000",
+        "BROWSER": "none",
+        "FAST_REFRESH": "true",
+        "GENERATE_SOURCEMAP": "true"
+      },
+      "auto_restart": true,
+      "max_restarts": 15,
+      "restart_delay": 2,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "alert_on_high_cpu": false,
+      "alert_on_high_memory": true,
+      "cpu_threshold": 80.0,
+      "memory_threshold": 75.0
+    },
+    {
+      "name": "nextjs-app",
+      "command": "npm run dev",
+      "working_dir": "/host/root/home/user/nextjs-app",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3002"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 3,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 70.0,
+      "memory_threshold": 70.0
+    },
+    {
+      "name": "vite-react",
+      "command": "npm run dev",
+      "working_dir": "/host/root/home/user/vite-react-app",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "5173"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 2,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 60.0,
+      "memory_threshold": 60.0
+    },
+    {
+      "name": "express-api",
+      "command": "nodemon app.js",
+      "working_dir": "/host/root/home/user/express-api",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "8080",
+        "DEBUG": "express:*"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 3,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 70.0,
+      "memory_threshold": 70.0
+    }
+  ],
+
+  "notifications": {
+    "email_enabled": false,
+    "webhook_enabled": true,
+    "webhook_url": "http://localhost:3001/webhook/processguard",
+    "webhook_headers": {
+      "Content-Type": "application/json",
+      "X-Source": "ProcessGuard"
+    },
+    "slack_enabled": false
+  },
+
+  "development_features": {
+    "enhanced_nodejs_monitoring": true,
+    "react_dev_server_monitoring": true,
+    "crash_pattern_detection": true,
+    "intelligent_restart": true,
+    "bundle_size_monitoring": true,
+    "compilation_time_tracking": true,
+    "dependency_checking": true,
+    "hot_reload_monitoring": true
+  }
+}

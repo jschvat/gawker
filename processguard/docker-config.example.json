@@ -1,0 +1,65 @@
+{
+  "log_level": "INFO",
+  "log_file": "/app/logs/daemon.log",
+  "log_base_dir": "/app/logs",
+  "monitor_interval": 10,
+  "auto_start_processes": true,
+  "cleanup_logs": true,
+  "log_retention_days": 7,
+
+  "processes": [
+    {
+      "name": "example-nodejs-app",
+      "command": "node /host/root/home/user/myapp/server.js",
+      "working_dir": "/host/root/home/user/myapp",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "3000"
+      },
+      "auto_restart": true,
+      "max_restarts": 5,
+      "restart_delay": 5,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "alert_on_high_cpu": true,
+      "alert_on_high_memory": true,
+      "cpu_threshold": 80.0,
+      "memory_threshold": 80.0
+    },
+    {
+      "name": "example-python-app",
+      "command": "python /host/root/home/user/python-app/app.py",
+      "working_dir": "/host/root/home/user/python-app",
+      "type": "python",
+      "env_vars": {
+        "PYTHONPATH": "/host/root/home/user/python-app"
+      },
+      "auto_restart": true,
+      "max_restarts": 3,
+      "restart_delay": 10,
+      "redirect_output": true,
+      "alert_on_failure": true
+    }
+  ],
+
+  "notifications": {
+    "email_enabled": false,
+    "email_smtp_server": "smtp.gmail.com",
+    "email_smtp_port": 587,
+    "email_username": "your-email@gmail.com",
+    "email_password": "your-app-password",
+    "email_recipients": ["admin@example.com"],
+    "email_use_tls": true,
+
+    "webhook_enabled": false,
+    "webhook_url": "https://your-webhook-endpoint.com/webhook",
+    "webhook_headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer your-token"
+    },
+
+    "slack_enabled": false,
+    "slack_webhook_url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+  }
+}

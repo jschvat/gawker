@@ -1,0 +1,211 @@
+{
+  "log_level": "INFO",
+  "log_file": "/app/logs/daemon.log",
+  "log_base_dir": "/app/logs",
+  "monitor_interval": 10,
+  "auto_start_processes": true,
+  "cleanup_logs": true,
+  "log_retention_days": 7,
+
+  "crash_management": {
+    "enabled": true,
+    "global_defaults": {
+      "max_crashes": 5,
+      "time_window_minutes": 10,
+      "action_on_threshold": "disable",
+      "kill_dependencies": false,
+      "quarantine_duration_minutes": 60
+    }
+  },
+
+  "processes": [
+    {
+      "name": "critical-api",
+      "command": "node server.js",
+      "working_dir": "/host/root/home/user/api",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "3001"
+      },
+      "auto_restart": true,
+      "max_restarts": 3,
+      "restart_delay": 10,
+      "redirect_output": true,
+      "alert_on_failure": true,
+      "cpu_threshold": 80.0,
+      "memory_threshold": 80.0,
+
+      "crash_policy": {
+        "max_crashes": 3,
+        "time_window_minutes": 15,
+        "action_on_threshold": "kill_dependencies",
+        "kill_dependencies": true,
+        "escalation_enabled": true
+      },
+      "dependencies": []
+    },
+
+    {
+      "name": "frontend-app",
+      "command": "npm start",
+      "working_dir": "/host/root/home/user/frontend",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "3000",
+        "REACT_APP_API_URL": "http://localhost:3001"
+      },
+      "auto_restart": true,
+      "max_restarts": 5,
+      "restart_delay": 5,
+      "redirect_output": true,
+      "alert_on_failure": true,
+
+      "crash_policy": {
+        "max_crashes": 6,
+        "time_window_minutes": 10,
+        "action_on_threshold": "disable",
+        "kill_dependencies": false
+      },
+      "dependencies": ["critical-api"]
+    },
+
+    {
+      "name": "worker-service",
+      "command": "node worker.js",
+      "working_dir": "/host/root/home/user/worker",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 3,
+      "redirect_output": true,
+
+      "crash_policy": {
+        "max_crashes": 8,
+        "time_window_minutes": 5,
+        "action_on_threshold": "quarantine",
+        "quarantine_duration_minutes": 30
+      },
+      "dependencies": ["critical-api"]
+    },
+
+    {
+      "name": "database-proxy",
+      "command": "node db-proxy.js",
+      "working_dir": "/host/root/home/user/db-proxy",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432"
+      },
+      "auto_restart": true,
+      "max_restarts": 2,
+      "restart_delay": 15,
+      "redirect_output": true,
+      "alert_on_failure": true,
+
+      "crash_policy": {
+        "max_crashes": 2,
+        "time_window_minutes": 20,
+        "action_on_threshold": "kill_dependencies",
+        "kill_dependencies": true,
+        "escalation_enabled": true
+      },
+      "dependencies": []
+    },
+
+    {
+      "name": "monitoring-dashboard",
+      "command": "npm run start:prod",
+      "working_dir": "/host/root/home/user/dashboard",
+      "type": "nodejs",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "4000"
+      },
+      "auto_restart": true,
+      "max_restarts": 10,
+      "restart_delay": 2,
+      "redirect_output": true,
+
+      "crash_policy": {
+        "max_crashes": 10,
+        "time_window_minutes": 5,
+        "action_on_threshold": "quarantine",
+        "quarantine_duration_minutes": 15
+      },
+      "dependencies": ["database-proxy", "critical-api"]
+    }
+  ],
+
+  "dependency_rules": {
+    "critical-api": {
+      "dependents": ["frontend-app", "worker-service", "monitoring-dashboard"],
+      "cascade_shutdown": true,
+      "shutdown_delay_seconds": 30
+    },
+    "database-proxy": {
+      "dependents": ["monitoring-dashboard"],
+      "cascade_shutdown": true,
+      "shutdown_delay_seconds": 10
+    }
+  },
+
+  "crash_policies": {
+    "development": {
+      "max_crashes": 10,
+      "time_window_minutes": 5,
+      "action_on_threshold": "quarantine",
+      "quarantine_duration_minutes": 10,
+      "kill_dependencies": false
+    },
+    "staging": {
+      "max_crashes": 6,
+      "time_window_minutes": 10,
+      "action_on_threshold": "disable",
+      "kill_dependencies": true
+    },
+    "production": {
+      "max_crashes": 3,
+      "time_window_minutes": 15,
+      "action_on_threshold": "kill_dependencies",
+      "kill_dependencies": true,
+      "escalation_enabled": true
+    }
+  },
+
+  "notifications": {
+    "email_enabled": true,
+    "email_smtp_server": "smtp.company.com",
+    "email_smtp_port": 587,
+    "email_username": "processguard@company.com",
+    "email_password": "${EMAIL_PASSWORD}",
+    "email_recipients": [
+      "devops-alerts@company.com",
+      "oncall@company.com"
+    ],
+    "email_use_tls": true,
+
+    "slack_enabled": true,
+    "slack_webhook_url": "${SLACK_WEBHOOK_URL}",
+
+    "crash_notification_channels": {
+      "process_disabled": ["email", "slack", "pagerduty"],
+      "dependency_shutdown": ["email", "slack", "pagerduty"],
+      "quarantine": ["slack"],
+      "crash_threshold_warning": ["slack"]
+    }
+  },
+
+  "admin_controls": {
+    "force_enable_endpoint": true,
+    "crash_history_reset": true,
+    "dependency_override": true,
+    "emergency_restart_all": true
+  }
+}

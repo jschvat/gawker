@@ -1,0 +1,132 @@
+{
+  "script_launch_examples": {
+    "simple_node_app": {
+      "name": "simple-api",
+      "command": "node server.js",
+      "working_dir": "/host/root/home/user/my-api",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3001"
+      }
+    },
+
+    "npm_script_launch": {
+      "name": "react-frontend",
+      "command": "npm start",
+      "working_dir": "/host/root/home/user/react-app",
+      "env_vars": {
+        "PORT": "3000",
+        "BROWSER": "none"
+      }
+    },
+
+    "custom_script_launch": {
+      "name": "custom-app",
+      "command": "./start-nodejs-api.sh",
+      "working_dir": "/host/root/home/user/my-app",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3001"
+      }
+    },
+
+    "smart_launcher": {
+      "name": "auto-detect-app",
+      "command": "./smart-launcher.sh my-app",
+      "working_dir": "/host/root/home/user/any-app",
+      "env_vars": {
+        "NODE_ENV": "development"
+      }
+    },
+
+    "yarn_based_app": {
+      "name": "yarn-app",
+      "command": "yarn dev",
+      "working_dir": "/host/root/home/user/yarn-project"
+    },
+
+    "nextjs_app": {
+      "name": "nextjs-site",
+      "command": "npm run dev",
+      "working_dir": "/host/root/home/user/nextjs-site",
+      "env_vars": {
+        "PORT": "3000"
+      }
+    },
+
+    "vite_react_app": {
+      "name": "vite-frontend",
+      "command": "npm run dev",
+      "working_dir": "/host/root/home/user/vite-app",
+      "env_vars": {
+        "PORT": "5173"
+      }
+    },
+
+    "express_with_nodemon": {
+      "name": "express-api",
+      "command": "nodemon app.js",
+      "working_dir": "/host/root/home/user/express-api",
+      "env_vars": {
+        "NODE_ENV": "development",
+        "PORT": "3001",
+        "DEBUG": "express:*"
+      }
+    },
+
+    "production_build_and_serve": {
+      "name": "prod-app",
+      "command": "./build-and-serve.sh",
+      "working_dir": "/host/root/opt/production-app",
+      "env_vars": {
+        "NODE_ENV": "production",
+        "PORT": "7510"
+      }
+    },
+
+    "python_flask_app": {
+      "name": "flask-api",
+      "command": "python app.py",
+      "working_dir": "/host/root/home/user/flask-app",
+      "env_vars": {
+        "FLASK_ENV": "development",
+        "FLASK_APP": "app.py"
+      }
+    },
+
+    "go_application": {
+      "name": "go-service",
+      "command": "go run main.go",
+      "working_dir": "/host/root/home/user/go-service",
+      "env_vars": {
+        "PORT": "8080"
+      }
+    },
+
+    "java_spring_boot": {
+      "name": "spring-service",
+      "command": "java -jar target/service.jar",
+      "working_dir": "/host/root/opt/java-services",
+      "env_vars": {
+        "SPRING_PROFILES_ACTIVE": "development",
+        "SERVER_PORT": "8080"
+      }
+    },
+
+    "docker_compose_managed": {
+      "name": "docker-stack",
+      "command": "docker-compose up",
+      "working_dir": "/host/root/home/user/docker-project",
+      "env_vars": {
+        "COMPOSE_PROJECT_NAME": "mystack"
+      }
+    },
+
+    "multi_command_script": {
+      "name": "complex-startup",
+      "command": "./complex-start.sh",
+      "working_dir": "/host/root/home/user/complex-app",
+      "description": "Script that starts DB, API, and frontend in sequence"
+    }
+  }
+}
