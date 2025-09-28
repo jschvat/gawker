@@ -13,14 +13,19 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+# Check if Docker Compose is installed and determine command
+DOCKER_COMPOSE_CMD=""
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+else
     echo "❌ Docker Compose is not installed. Please install Docker Compose first:"
     echo "   https://docs.docker.com/compose/install/"
     exit 1
 fi
 
-echo "✅ Docker and Docker Compose are installed"
+echo "✅ Docker and Docker Compose are installed (using: $DOCKER_COMPOSE_CMD)"
 
 # Create data directories
 echo "📁 Creating data directories..."
@@ -52,10 +57,10 @@ fi
 
 # Build and start services
 echo "🏗️  Building ProcessGuard..."
-docker-compose build
+$DOCKER_COMPOSE_CMD build
 
 echo "🚀 Starting ProcessGuard services..."
-docker-compose up -d
+$DOCKER_COMPOSE_CMD up -d
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to start..."
@@ -72,7 +77,7 @@ for i in {1..30}; do
     if [ $i -eq 30 ]; then
         echo "❌ ProcessGuard failed to start properly"
         echo "📋 Checking logs:"
-        docker-compose logs processguard
+        $DOCKER_COMPOSE_CMD logs processguard
         exit 1
     fi
 
@@ -88,11 +93,11 @@ echo "🔌 API Endpoint:  http://localhost:7501/api/v1"
 echo "📁 Data Directory: $(pwd)/docker-data"
 echo ""
 echo "📖 Useful Commands:"
-echo "   View logs:     docker-compose logs -f"
-echo "   Stop services: docker-compose down"
-echo "   Restart:       docker-compose restart"
+echo "   View logs:     $DOCKER_COMPOSE_CMD logs -f"
+echo "   Stop services: $DOCKER_COMPOSE_CMD down"
+echo "   Restart:       $DOCKER_COMPOSE_CMD restart"
 echo "   Update config: edit docker-data/config/config.json then restart"
 echo ""
 echo "⚙️  Configuration:"
 echo "   Edit: docker-data/config/config.json"
-echo "   Then run: docker-compose restart processguard"
+echo "   Then run: $DOCKER_COMPOSE_CMD restart processguard"
